@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('example.index', ['title' => 'Dashboard']);
+    return view('example.content._index', ['title' => 'Dashboard Stockify']);
 })->name('index');
 
 Route::get('layouts/stacked', function () {

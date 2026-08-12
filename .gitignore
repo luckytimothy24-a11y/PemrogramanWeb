@@ -1,4 +1,5 @@
 /.phpunit.cache
+/.phpunit.result.cache
 /node_modules
 /public/build
 /public/hot
@@ -16,3 +17,10 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# File sensitif / utilitas lokal (jangan di-commit)
+/cookies.txt
+/check_auth.php
+/create_admin_user.php
+/composer-setup.php
+/composer.phar
