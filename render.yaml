@@ -5,7 +5,7 @@ services:
     plan: free
     region: singapore
     dockerfilePath: ./Dockerfile
-    startCommand: /bin/sh -c "php artisan migrate --force --no-interaction; php artisan storage:link --force; php-fpm & nginx -g 'daemon off;'"
+    startCommand: /bin/sh -c "php artisan migrate --force --no-interaction; php artisan db:seed --force --no-interaction; php artisan storage:link --force; php-fpm & nginx -g 'daemon off;'"
     envVars:
       - key: APP_ENV
         value: production
@@ -22,7 +22,7 @@ services:
         value: stderr
       - key: SESSION_DRIVER
         value: file
-      - key: CACHE_STORE
+      - key: CACHE_DRIVER
         value: file
       - key: QUEUE_CONNECTION
         value: sync

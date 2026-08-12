@@ -24,4 +24,4 @@ COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 
 EXPOSE 8080
 
-CMD ["/bin/sh", "-c", "php artisan migrate --force --no-interaction; php artisan storage:link --force; php-fpm & nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "php artisan migrate --force --no-interaction; php artisan db:seed --force --no-interaction; php artisan storage:link --force; php-fpm & nginx -g 'daemon off;'"]
