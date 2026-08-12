@@ -28,7 +28,7 @@ class ProductService
 
     public function createProduct(array $data)
     {
-        $data['sku'] = $data['sku'] ?: $this->generateSku($data['name']);
+        $data['sku'] = ! empty($data['sku']) ? $data['sku'] : $this->generateSku($data['name']);
 
         if (! empty($data['image']) && is_object($data['image'])) {
             $data['image'] = $this->storeImage($data['image']);
@@ -105,6 +105,20 @@ class ProductService
             $rows = [];
             foreach ($attributes as $name => $value) {
                 if (is_array($value)) {
+                    // Format dari form: attributes[i][name] & attributes[i][value]
+                    if (isset($value['name']) || isset($value['value'])) {
+                        if (! empty($value['name']) || ! empty($value['value'])) {
+                            $rows[] = [
+                                'product_id' => $product->id,
+                                'name' => $value['name'] ?? $name,
+                                'value' => $value['value'] ?? '',
+                            ];
+                        }
+
+                        continue;
+                    }
+
+                    // Format alternatif: daftar item { name, value }
                     foreach ($value as $item) {
                         if (! empty($item['name']) || ! empty($item['value'])) {
                             $rows[] = [

@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Str;
 
+$databaseUrl = env('DATABASE_URL', '');
+
+$defaultConnection = Str::startsWith($databaseUrl, 'postgres')
+    ? 'pgsql'
+    : (env('DB_CONNECTION') ?: 'mysql');
+
 return [
 
     /*
@@ -11,11 +17,11 @@ return [
     |
     | Here you may specify which of the database connections below you wish
     | to use as your default connection for all database work. Of course
-    | you may use many connections at once using the Database library.
+    | you may use many connections at once using the Library.
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => $defaultConnection,
 
     /*
     |--------------------------------------------------------------------------

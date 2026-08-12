@@ -71,6 +71,39 @@ Catatan untuk plan gratis Render:
 - Database PostgreSQL free hanya bertahan 30 hari, setelah itu harus dibuat ulang.
 - Migrasi otomatis dijalankan setiap start (lihat `startCommand` di `render.yaml`).
 
+## Deploy Publik di Railway (Gratis, Tanpa Kartu)
+
+Proyek sudah disiapkan untuk deploy ke [Railway](https://railway.app) lewat Dockerfile + `railway.json`.
+
+1. Pastikan kode sudah di-push ke repo GitHub (repo boleh **Private**).
+2. Login ke [railway.app](https://railway.app) pakai akun GitHub (free tier $5/bulan, tanpa kartu kredit).
+3. Klik **New Project** → **Deploy from GitHub repo** → pilih repo proyek ini.
+4. Tambahkan database: **New** → **Database** → pilih **PostgreSQL** (gratis, ~500 MB).
+5. Buka service **PostgreSQL** → tab **Variables** → salin nilai `DATABASE_URL` (di generate otomatis).
+6. Buka service **stockify** → tab **Variables** → tambahkan:
+   ```
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_KEY=base64:8ULmy9TGAupHnEh3hbIfgHN3eIgNqa4snQcNwOU3IbA=
+   APP_URL=<URL service stockify kamu, mis. https://stockify-production.up.railway.app>
+   DB_CONNECTION=pgsql
+   DATABASE_URL=<nilai dari langkah 5>
+   DB_SSLMODE=require
+   ```
+   > Karena `.env` tidak ikut di-deploy, `APP_KEY` wajib diisi (pakai nilai di atas atau buat baru dengan `php artisan key:generate --show`). `DATABASE_URL` cukup untuk koneksi; `DB_CONNECTION=pgsql` membuat Laravel memakai koneksi PostgreSQL.
+7. Railwail akan build otomatis dari Dockerfile. Saat start otomatis menjalankan `migrate` + `db:seed` + `storage:link`.
+8. Buka URL service kamu, lalu login dengan akun demo:
+   | Peran   | Email              | Password   |
+   |---------|--------------------|------------|
+   | Admin   | admin@example.com  | password   |
+   | Manajer | manager@example.com| password   |
+   | Staff   | staff@example.com  | password   |
+
+Catatan:
+- Free tier Railway = $5/bulan kredit (dipakai untuk PostgreSQL + web service kecil). Jika kredit habis, tinggal buat project baru.
+- Service akan tidur saat tidak ada request; request pertama agak lambat (cold start).
+- File session/cache pakai `file`, jadi login akan hilang saat service restart — normal untuk demo.
+
 ## Struktur
 
 - `app/Http/Controllers` - controller per modul
