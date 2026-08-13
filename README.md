@@ -104,6 +104,29 @@ Catatan:
 - Service akan tidur saat tidak ada request; request pertama agak lambat (cold start).
 - File session/cache pakai `file`, jadi login akan hilang saat service restart — normal untuk demo.
 
+## Alur Kerja Gitflow
+
+Proyek ini memakai model branching **Gitflow**:
+
+- `main` — kode produksi/rilis (yang siap di-deploy).
+- `develop` — cabang pengembangan tempat semua fitur digabung.
+- `feature/<nama>` — dibuat dari `develop` untuk tiap fitur baru.
+- `release/<versi>` — persiapan rilis dari `develop`, lalu digabung ke `main`.
+- `hotfix/<nama>` — perbaikan darurat dari `main`.
+
+Alur menambah fitur:
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/nama-fitur   # kerjakan di sini
+git add -A && git commit -m "Tambah fitur ..."
+git checkout develop
+git pull origin develop
+git merge --no-ff feature/nama-fitur
+git push origin develop
+```
+
 ## Struktur
 
 - `app/Http/Controllers` - controller per modul
