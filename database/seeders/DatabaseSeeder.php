@@ -111,6 +111,11 @@ class DatabaseSeeder extends Seeder
 
         $today = now();
 
+        // Seed idempoten: bersihkan data demo lama sebelum dibuat ulang
+        StockTransaction::query()->delete();
+        StockOpname::query()->delete();
+        ActivityLog::query()->delete();
+
         $transactions = [
             // Barang masuk
             ['product' => 0, 'type' => 'in', 'qty' => 50, 'sup' => 0, 'user' => 1, 'date' => 45, 'note' => 'Pembelian awal'],
