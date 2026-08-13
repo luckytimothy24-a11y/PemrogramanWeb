@@ -25,7 +25,7 @@
             @endforeach
         </select>
         <p class="mt-1 text-xs text-gray-400">
-            Admin mengelola semua data &amp; pengguna. Manajer Gudang mencatat transaksi &amp; membuat laporan. Staff melihat &amp; membantu operasional.
+            Admin mengelola semua data &amp; pengguna. Manajer Gudang mencatat transaksi &amp; membuat laporan. Staff mencatat transaksi &amp; membantu operasional.
         </p>
         @error('role') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
     </div>

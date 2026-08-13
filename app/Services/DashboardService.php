@@ -84,4 +84,25 @@ class DashboardService
             'values' => $categories->map(fn ($c) => (int) $c->products->sum('stock'))->values(),
         ];
     }
+
+    public function getStaffTasks()
+    {
+        $today = Carbon::today();
+
+        $incoming = StockTransaction::with('product')
+            ->where('type', 'in')
+            ->whereDate('transaction_date', $today)
+            ->latest('transaction_date')
+            ->take(10)
+            ->get();
+
+        $outgoing = StockTransaction::with('product')
+            ->where('type', 'out')
+            ->whereDate('transaction_date', $today)
+            ->latest('transaction_date')
+            ->take(10)
+            ->get();
+
+        return compact('incoming', 'outgoing');
+    }
 }

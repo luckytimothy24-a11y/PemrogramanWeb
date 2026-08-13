@@ -8,6 +8,7 @@ use App\Services\ProductService;
 use App\Services\SupplierService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
@@ -114,5 +115,64 @@ class ProductController extends Controller
         $this->activityLogService->log('Hapus Produk', "Produk \"{$name}\" dihapus.");
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+    }
+
+    public function export(): StreamedResponse
+    {
+        $products = $this->productService->exportProducts();
+
+        return response()->streamDownload(function () use ($products) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Nama', 'SKU', 'Kategori', 'Supplier', 'Harga Beli', 'Harga Jual', 'Stok', 'Stok Minimum', 'Deskripsi']);
+            foreach ($products as $product) {
+                fputcsv($out, [
+                    $product->name,
+                    $product->sku,
+                    $product->category->name ?? '',
+                    $product->supplier->name ?? '',
+                    (float) $product->purchase_price,
+                    (float) $product->selling_price,
+                    $product->stock,
+                    $product->min_stock,
+                    $product->description ?? '',
+                ]);
+            }
+            fclose($out);
+        }, 'produk-'.date('Ymd-His').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function showImport()
+    {
+        return view('products.import');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt,text/csv,text/plain,application/vnd.ms-excel', 'max:4096'],
+        ]);
+
+        $result = $this->productService->importProducts($request->file('file'));
+
+        $this->activityLogService->log(
+            'Import Produk',
+            "Import produk: {$result['imported']} berhasil, {$result['skipped']} dilewati."
+        );
+
+        return redirect()->route('products.import')
+            ->with('success', "Import selesai: {$result['imported']} produk ditambahkan, {$result['skipped']} baris dilewati (baris kosong, SKU duplikat, atau tanpa kategori). {$result['categoriesCreated']} kategori baru & {$result['suppliersCreated']} supplier baru dibuat.");
+    }
+
+    public function importTemplate(): StreamedResponse
+    {
+        return response()->streamDownload(function () {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Nama', 'SKU', 'Kategori', 'Supplier', 'Harga Beli', 'Harga Jual', 'Stok', 'Stok Minimum', 'Deskripsi']);
+            fputcsv($out, ['Lampu LED 12W', 'LED-001', 'Elektronik', 'PT Sumber Jaya Elektronik', '25000', '40000', '50', '10', 'Contoh produk pertama']);
+            fputcsv($out, ['Minyak Goreng 1L', '', 'Kebersihan', '', '15000', '18000', '30', '5', 'SKU dikosongkan = dibuat otomatis']);
+            fclose($out);
+        }, 'template-produk.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

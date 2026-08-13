@@ -8,7 +8,7 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Riwayat Transaksi Stok</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Catatan seluruh barang masuk dan keluar.</p>
     </div>
-    @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+    @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isStaff())
         <div class="flex gap-2">
             <a href="{{ route('stock.transactions.create', 'in') }}" class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">+ Barang Masuk</a>
             <a href="{{ route('stock.transactions.create', 'out') }}" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">- Barang Keluar</a>

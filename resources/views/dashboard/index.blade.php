@@ -9,7 +9,7 @@
         <p class="text-sm text-gray-500 dark:text-gray-400">Ringkasan kondisi persediaan dan aktivitas terbaru.</p>
     </div>
     <div class="flex flex-wrap gap-2">
-        @if($user->isAdmin() || $user->isManager())
+        @if($user->isAdmin() || $user->isManager() || $user->isStaff())
             <a href="{{ route('stock.transactions.create', 'in') }}" class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">+ Barang Masuk</a>
             <a href="{{ route('stock.transactions.create', 'out') }}" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">- Barang Keluar</a>
         @endif
@@ -33,6 +33,46 @@
         <p class="text-xs text-gray-500 dark:text-gray-400">Unit keluar hari ini</p>
     </x-stat-card>
 </div>
+
+@if($user->isStaff() && isset($tasks))
+<div class="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Daftar Tugas Hari Ini</h2>
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div>
+            <div class="mb-2 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-green-700 dark:text-green-400">Barang Masuk — Perlu Diperiksa &amp; Dicatat</h3>
+                <a href="{{ route('stock.transactions.create', 'in') }}" class="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">Catat masuk</a>
+            </div>
+            <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+                @forelse($tasks['incoming'] as $txn)
+                    <li class="flex items-center justify-between py-2.5 text-sm">
+                        <span class="font-medium text-gray-900 dark:text-white">{{ $txn->product->name ?? 'Produk terhapus' }}</span>
+                        <span class="text-green-600 dark:text-green-400">+{{ $txn->quantity }}</span>
+                    </li>
+                @empty
+                    <li class="py-3 text-sm text-gray-400">Belum ada penerimaan barang hari ini.</li>
+                @endforelse
+            </ul>
+        </div>
+        <div>
+            <div class="mb-2 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-red-700 dark:text-red-400">Barang Keluar — Perlu Disiapkan &amp; Dicatat</h3>
+                <a href="{{ route('stock.transactions.create', 'out') }}" class="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">Catat keluar</a>
+            </div>
+            <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+                @forelse($tasks['outgoing'] as $txn)
+                    <li class="flex items-center justify-between py-2.5 text-sm">
+                        <span class="font-medium text-gray-900 dark:text-white">{{ $txn->product->name ?? 'Produk terhapus' }}</span>
+                        <span class="text-red-600 dark:text-red-400">-{{ $txn->quantity }}</span>
+                    </li>
+                @empty
+                    <li class="py-3 text-sm text-gray-400">Belum ada pengeluaran barang hari ini.</li>
+                @endforelse
+            </ul>
+        </div>
+    </div>
+</div>
+@endif
 
 <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
     <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm lg:col-span-2 dark:border-gray-700 dark:bg-gray-800">

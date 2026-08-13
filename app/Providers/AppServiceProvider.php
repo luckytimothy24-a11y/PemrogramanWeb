@@ -16,7 +16,9 @@ use App\Repositories\StockOpnameRepository;
 use App\Repositories\StockTransactionRepository;
 use App\Repositories\SupplierRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,6 +44,10 @@ class AppServiceProvider extends ServiceProvider
     {
         if (app()->environment('production')) {
             URL::forceScheme('https');
+        }
+
+        if (Schema::hasTable('settings')) {
+            View::share('settings', \App\Models\Setting::pluck('value', 'key'));
         }
     }
 }

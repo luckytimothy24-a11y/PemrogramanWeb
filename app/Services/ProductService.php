@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\Supplier;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -76,6 +78,166 @@ class ProductService
     public function search($keyword)
     {
         return $this->productRepository->search($keyword);
+    }
+
+    public function exportProducts()
+    {
+        return Product::with(['category', 'supplier'])->orderBy('name')->get();
+    }
+
+    public function importProducts(\Illuminate\Http\UploadedFile $file): array
+    {
+        $imported = 0;
+        $skipped = 0;
+        $categoriesCreated = 0;
+        $suppliersCreated = 0;
+
+        $handle = fopen($file->getRealPath(), 'r');
+        if ($handle === false) {
+            return compact('imported', 'skipped', 'categoriesCreated', 'suppliersCreated');
+        }
+
+        $headers = fgetcsv($handle);
+        $map = $this->buildHeaderMap($headers ?: []);
+
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count(array_filter($row)) === 0) {
+                continue;
+            }
+
+            $data = $this->mapRow($map, $row);
+            $name = trim($data['name'] ?? '');
+
+            if ($name === '') {
+                $skipped++;
+                continue;
+            }
+
+            $sku = trim($data['sku'] ?? '');
+            if ($sku === '') {
+                $sku = $this->generateSku($name);
+            } elseif ($this->productRepository->findBySku($sku)) {
+                $skipped++;
+                continue;
+            }
+
+            $category = null;
+            $categoryName = trim($data['category'] ?? '');
+            if ($categoryName !== '') {
+                $category = Category::firstOrCreate(
+                    ['name' => $categoryName],
+                    ['slug' => Str::slug($categoryName)]
+                );
+                if ($category->wasRecentlyCreated) {
+                    $categoriesCreated++;
+                }
+            }
+
+            if (! $category) {
+                $skipped++;
+                continue;
+            }
+
+            $supplier = null;
+            $supplierName = trim($data['supplier'] ?? '');
+            if ($supplierName !== '') {
+                $supplier = Supplier::firstOrCreate(
+                    ['name' => $supplierName],
+                    ['contact_person' => null, 'phone' => null, 'email' => null, 'address' => null]
+                );
+                if ($supplier->wasRecentlyCreated) {
+                    $suppliersCreated++;
+                }
+            }
+
+            $description = trim($data['description'] ?? '');
+
+            $this->productRepository->create([
+                'name' => $name,
+                'sku' => $sku,
+                'category_id' => $category->id,
+                'supplier_id' => $supplier?->id,
+                'purchase_price' => $this->normalizeNumber($data['purchase_price'] ?? 0),
+                'selling_price' => $this->normalizeNumber($data['selling_price'] ?? 0),
+                'stock' => (int) $this->normalizeNumber($data['stock'] ?? 0),
+                'min_stock' => (int) $this->normalizeNumber($data['min_stock'] ?? 0),
+                'description' => $description !== '' ? $description : null,
+                'image' => null,
+            ]);
+
+            $imported++;
+        }
+
+        fclose($handle);
+
+        return compact('imported', 'skipped', 'categoriesCreated', 'suppliersCreated');
+    }
+
+    protected function buildHeaderMap(array $headers): array
+    {
+        $labels = [
+            'nama' => 'name',
+            'name' => 'name',
+            'sku' => 'sku',
+            'kategori' => 'category',
+            'category' => 'category',
+            'supplier' => 'supplier',
+            'harga beli' => 'purchase_price',
+            'harga_beli' => 'purchase_price',
+            'hargabeli' => 'purchase_price',
+            'purchase_price' => 'purchase_price',
+            'harga jual' => 'selling_price',
+            'harga_jual' => 'selling_price',
+            'hargajual' => 'selling_price',
+            'selling_price' => 'selling_price',
+            'stok' => 'stock',
+            'stock' => 'stock',
+            'stok minimum' => 'min_stock',
+            'stok_minimum' => 'min_stock',
+            'minstok' => 'min_stock',
+            'min_stock' => 'min_stock',
+            'deskripsi' => 'description',
+            'description' => 'description',
+        ];
+
+        $map = [];
+        foreach ($headers as $index => $header) {
+            $key = mb_strtolower(trim((string) $header));
+            $key = preg_replace('/^\xEF\xBB\xBF/', '', $key);
+
+            if (isset($labels[$key])) {
+                $map[$index] = $labels[$key];
+            }
+        }
+
+        return $map;
+    }
+
+    protected function mapRow(array $map, array $row): array
+    {
+        $data = [];
+        foreach ($map as $index => $field) {
+            $data[$field] = trim($row[$index] ?? '');
+        }
+
+        return $data;
+    }
+
+    protected function normalizeNumber($value): float
+    {
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        $value = trim((string) $value);
+        if ($value === '') {
+            return 0;
+        }
+
+        $value = str_replace(['.', ' '], '', $value);
+        $value = str_replace(',', '.', $value);
+
+        return (float) $value;
     }
 
     public function generateSku($name)

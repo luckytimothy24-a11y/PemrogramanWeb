@@ -27,6 +27,7 @@ class DashboardController extends Controller
         $recentActivities = $this->activityLogService->latest(8);
 
         $user = auth()->user();
+        $tasks = $user->isStaff() ? $this->dashboardService->getStaffTasks() : null;
 
         return view('dashboard.index', compact(
             'summary',
@@ -35,7 +36,8 @@ class DashboardController extends Controller
             'chart',
             'stockByCategory',
             'recentActivities',
-            'user'
+            'user',
+            'tasks'
         ));
     }
 }

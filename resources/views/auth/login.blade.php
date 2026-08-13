@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - Stockify</title>
+    <title>Masuk - {{ $settings['app_name'] ?? 'Stockify' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="h-full">
@@ -11,7 +11,7 @@
         <div class="mx-auto flex max-w-md flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
             <div class="bg-slate-900 p-8 text-center text-white sm:p-10">
                 <div class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300">
-                    Stockify Admin
+                    {{ $settings['app_name'] ?? 'Stockify' }} Admin
                 </div>
                 <h1 class="mt-5 text-2xl font-semibold sm:text-3xl">Masuk ke akun Anda</h1>
                 <p class="mt-2 text-sm leading-6 text-slate-300">

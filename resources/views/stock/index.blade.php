@@ -79,7 +79,7 @@
                         </td>
                         <td class="px-5 py-3">
                             <div class="flex items-center justify-end gap-2">
-                                @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+                                @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isStaff())
                                     <a href="{{ route('stock.transactions.create', 'in') }}" class="rounded-lg bg-green-50 p-2 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50" title="Barang Masuk">
                                         <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a1 1 0 100-2H6a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H6V6h3zM15 3a1 1 0 00-1 1v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L16 9.586V4a1 1 0 00-1-1z"/></svg>
                                     </a>

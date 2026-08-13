@@ -74,6 +74,8 @@
             <div class="mt-6 flex gap-3">
                 @if(auth()->user()->isAdmin() || auth()->user()->isManager())
                     <a href="{{ route('products.edit', $product->id) }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Ubah Produk</a>
+                @endif
+                @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isStaff())
                     <a href="{{ route('stock.transactions.create', 'in') }}" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Tambah Stok</a>
                 @endif
             </div>

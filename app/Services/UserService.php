@@ -29,7 +29,7 @@ class UserService
 
     public function createUser(array $data)
     {
-        $data['password'] = Hash::make($data['password'] ?? 'password');
+        $data['password'] = Hash::make(! empty($data['password']) ? $data['password'] : 'password');
         $data['role'] = $data['role'] ?? User::ROLE_STAFF;
 
         $user = $this->userRepository->create($data);

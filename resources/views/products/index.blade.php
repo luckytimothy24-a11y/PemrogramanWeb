@@ -14,6 +14,12 @@
                 class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
             <button type="submit" class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Cari</button>
         </form>
+        @if(auth()->user()->isAdmin())
+            <div class="flex gap-2">
+                <a href="{{ route('products.export') }}" class="rounded-lg border border-green-300 px-4 py-2 text-center text-sm font-medium text-green-700 hover:bg-green-50 dark:border-green-600 dark:text-green-300 dark:hover:bg-green-900/30" title="Unduh semua produk dalam format CSV">Export CSV</a>
+                <a href="{{ route('products.import') }}" class="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Import</a>
+            </div>
+        @endif
         @if(auth()->user()->isAdmin() || auth()->user()->isManager())
             <a href="{{ route('products.create') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700">+ Tambah Produk</a>
         @endif

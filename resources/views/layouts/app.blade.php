@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — Stockify</title>
+    <title>@yield('title', 'Dashboard') — {{ $settings['app_name'] ?? 'Stockify' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -23,11 +23,15 @@
         <aside id="sidebar" class="fixed top-0 left-0 z-40 flex h-screen w-64 shrink-0 -translate-x-full flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:translate-x-0 dark:border-gray-700 dark:bg-gray-800" aria-label="Sidebar">
             <div class="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 px-5 dark:border-gray-700">
                 <a href="{{ route('dashboard.index') }}" class="flex items-center gap-2">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 2v2h10V5H5zm-2 5a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4zm2 2v2h10v-2H5z"></path></svg>
-                    </span>
+                    @if(! empty($settings['app_logo']))
+                        <img src="{{ asset('storage/' . $settings['app_logo']) }}" alt="{{ $settings['app_name'] ?? 'Stockify' }}" class="h-9 w-9 rounded-xl object-contain">
+                    @else
+                        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 2v2h10V5H5zm-2 5a1 1 0 011-1h12a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4zm2 2v2h10v-2H5z"></path></svg>
+                        </span>
+                    @endif
                     <div>
-                        <span class="text-lg font-bold text-gray-900 dark:text-white">Stockify</span>
+                        <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $settings['app_name'] ?? 'Stockify' }}</span>
                         <span class="block text-[10px] font-medium uppercase tracking-wider text-gray-400">Manajemen Stok</span>
                     </div>
                 </a>
@@ -61,7 +65,7 @@
                     </x-nav-link>
                 </ul>
 
-                @if($currentUser->isAdmin() || $currentUser->isManager())
+                @if($currentUser->isAdmin() || $currentUser->isManager() || $currentUser->isStaff())
                 <p class="mt-6 mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Transaksi Stok</p>
                 <ul class="space-y-1">
                     <x-nav-link :route="'stock.transactions.create'" :params="['type' => 'in']" label="Barang Masuk">
@@ -82,9 +86,11 @@
                     <x-nav-link :route="'reports.transactions'" label="Laporan Transaksi">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM2 9h16v5a2 2 0 01-2 2H4a2 2 0 01-2-2V9zm6 2a1 1 0 100 2h4a1 1 0 100-2H8z"></path></svg>
                     </x-nav-link>
-                    <x-nav-link :route="'reports.activities'" label="Aktivitas Pengguna">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
-                    </x-nav-link>
+                    @if($currentUser->isAdmin())
+                        <x-nav-link :route="'reports.activities'" label="Aktivitas Pengguna">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
+                        </x-nav-link>
+                    @endif
                 </ul>
                 @endif
 
@@ -93,6 +99,9 @@
                 <ul class="space-y-1">
                     <x-nav-link :route="'users.index'" label="Pengguna">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path></svg>
+                    </x-nav-link>
+                    <x-nav-link :route="'settings.index'" label="Pengaturan">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 4a1 1 0 00-1 1v1h12V5a1 1 0 00-1-1H5zm10 4H5v7a1 1 0 001 1h8a1 1 0 001-1V8zM3 3a2 2 0 012-2h10a2 2 0 012 2v1h.5A1.5 1.5 0 0119 5.5v.75l-.002.086A1.5 1.5 0 0117.5 7.5h-.5V15a3 3 0 01-3 3H6a3 3 0 01-3-3V7.5h-.5A1.5 1.5 0 011 6V5.5A1.5 1.5 0 012.5 4H3V3z"/></svg>
                     </x-nav-link>
                 </ul>
                 @endif
@@ -176,7 +185,7 @@
             </main>
 
             <footer class="shrink-0 border-t border-gray-200 bg-white px-6 py-4 text-center text-xs text-gray-400 dark:border-gray-700 dark:bg-gray-800">
-                Stockify &copy; {{ date('Y') }} — Aplikasi Manajemen Stok Barang
+                {{ $settings['app_name'] ?? 'Stockify' }} &copy; {{ date('Y') }} — Aplikasi Manajemen Stok Barang
             </footer>
         </div>
     </div>

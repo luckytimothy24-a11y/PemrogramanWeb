@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StockOpnameController;
 use App\Http\Controllers\StockTransactionController;
@@ -30,6 +31,10 @@ Route::middleware('auth')->group(function () {
     // Semua role dapat melihat data
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('/products/create', [ProductController::class, 'create'])->middleware('role:admin,manager')->name('products.create');
+    Route::get('/products/import', [ProductController::class, 'showImport'])->middleware('role:admin')->name('products.import');
+    Route::post('/products/import', [ProductController::class, 'import'])->middleware('role:admin')->name('products.import.process');
+    Route::get('/products/import/template', [ProductController::class, 'importTemplate'])->middleware('role:admin')->name('products.import.template');
+    Route::get('/products/export', [ProductController::class, 'export'])->middleware('role:admin')->name('products.export');
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
     Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
@@ -57,6 +62,16 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/suppliers/{id}/edit', [SupplierController::class, 'edit'])->name('suppliers.edit');
     Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->name('suppliers.update');
     Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::delete('/settings/logo', [SettingsController::class, 'destroyLogo'])->name('settings.logo.delete');
+});
+
+// Semua role yang menangani operasional gudang dapat mencatat transaksi barang masuk/keluar
+Route::middleware(['auth', 'role:admin,manager,staff'])->group(function () {
+    Route::get('/stock/transactions/create/{type}', [StockTransactionController::class, 'create'])->name('stock.transactions.create');
+    Route::post('/stock/transactions/create/{type}', [StockTransactionController::class, 'store'])->name('stock.transactions.store');
 });
 
 // Admin & Manajer Gudang
@@ -66,8 +81,6 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-    Route::get('/stock/transactions/create/{type}', [StockTransactionController::class, 'create'])->name('stock.transactions.create');
-    Route::post('/stock/transactions/create/{type}', [StockTransactionController::class, 'store'])->name('stock.transactions.store');
     Route::delete('/stock/transactions/{id}', [StockTransactionController::class, 'destroy'])->name('stock.transactions.destroy');
 
     Route::post('/stock/opname', [StockOpnameController::class, 'store'])->name('stock.opname.store');
@@ -77,6 +90,10 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
     Route::get('/reports/stock/export', [ReportController::class, 'exportStock'])->name('reports.stock.export');
     Route::get('/reports/transactions', [ReportController::class, 'transactions'])->name('reports.transactions');
     Route::get('/reports/transactions/export', [ReportController::class, 'exportTransactions'])->name('reports.transactions.export');
+});
+
+// Laporan aktivitas pengguna khusus Admin
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/reports/activities', [ReportController::class, 'activities'])->name('reports.activities');
     Route::get('/reports/activities/export', [ReportController::class, 'exportActivities'])->name('reports.activities.export');
 });

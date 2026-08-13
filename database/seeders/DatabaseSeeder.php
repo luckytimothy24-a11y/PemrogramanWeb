@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductAttribute;
+use App\Models\Setting;
 use App\Models\StockOpname;
 use App\Models\StockTransaction;
 use App\Models\Supplier;
@@ -19,6 +20,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        Setting::updateOrCreate(['key' => 'app_name'], ['value' => 'Stockify']);
+
         $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
